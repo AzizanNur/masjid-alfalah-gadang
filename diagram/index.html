@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Financial Ramadan 2024 / 1445 H Masjid Alfalah Gadang</title>
+    <meta name="description" content="Bismillah, Berikut Data Terbaru Laporan Ramadan 2024 / 1445 H Masjid Alfalah Gadang" />
+    <meta name="keywords" content="Bismillah, berikut, data, terbaru, laporan, ramadan, 2024," />
+    <meta property="og:image" content="https://asset-2.tstatic.net/tribunnews/foto/bank/images/jadwal-puasa-ramadan-2024-treh4.jpg"/>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .financial-overview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        table {
+            width: 100%;
+            max-width: 500px;
+            border-collapse: collapse;
+            margin: 10px 0;
+            background: #fff;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .pie-chart-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+        #pieChart {
+            width: 100%;
+            height: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .financial-overview {
+                width: 100%;
+            }
+            .pie-chart-container {
+                width: 100%;
+                height: auto;
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .slot-rab,
+        .title-rab
+        {
+            display: none;
+        }
+
+        .table_all{
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>Laporan Ramadan Masjid Alfalah Gadang</h2>
+        <hr>
+    </div>
+
+    <div class="financial-overview">
+        <!-- Tabel RAB vs Realisasi -->
+        <div class="slot-rab">
+            <table>
+                <tr>
+                    <th>RAB</th>
+                    <th>Pemasukan</th>
+                    <th>Kekurangan</th>
+                </tr>
+                <tr>
+                    <td id="rab">Rp 0</td>
+                    <td id="pemasukan">Rp 0</td>
+                    <td id="kekurangan">Rp 0</td>
+                </tr>
+                <tr>
+                    <td>Prosentase :</td>
+                    <td id="prosentasePemasukan">0%</td>
+                    <td id="prosentaseKekurangan">0%</td>
+                </tr>
+            </table>
+        </div>
+        
+        <img src="loading.gif" alt="" class="loader" style="width: 50px;margin-top:75px">
+
+        <!-- Diagram Pie -->
+        <h3 class="title-rab">RAB VS Realisasi</h3>
+        <div class="pie-chart-container">
+            <canvas id="pieChart"></canvas>
+        </div>
+
+        <div class="table_all" style="display: none;">
+            <table id="tableKeterangan">
+                <tr><th>Keterangan</th><th>Pemasukan</th></tr>
+                <tr><td>Donatur Instansi</td><td>Rp 0</td></tr>
+                <tr><td>Donatur individu</td><td>Rp 0</td></tr>
+                <tr><td>Kas MIQ</td><td>Rp 0</td></tr>
+                <tr><td>Donasi barang dirupiahkan</td><td>Rp 0</td></tr>
+                <tr><td>Total :</td><td id="total">Rp 0</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+
+        let dataAPI = '';
+        fetch('https://script.google.com/macros/s/AKfycbwJBpcAJCgoB6TseSGiwp698jnaylOvb2ZVYFM5E5JAaf3zbSRbB1SBF2pvwDhfRRPi_w/exec')
+        .then(response => {
+            if (!response.ok) {
+            throw new Error('Network response was not ok');
+            }
+            return response.json(); // Mengubah respon ke objek JSON
+        })
+        .then(data => {
+            // Lakukan sesuatu dengan data yang diterima
+            dataAPI = data
+            
+            let dataProsentaseMasuk      = dataAPI.prosentasePemasukan.replace('%', '');
+            let dataProsentaseKekurangan = dataAPI.prosentaseKekurangan.replace('%', '');
+            
+            let kebutuhan = dataAPI.kebutuhan;
+            let formattedKebutuhan = new Intl.NumberFormat('id-ID').format(kebutuhan);
+
+            let pemasukan = dataAPI.pemasukan;
+            let formattedPemasukan = new Intl.NumberFormat('id-ID').format(pemasukan);
+
+            let kekurangan = dataAPI.kekurangan;
+            let formattedKekurangan = new Intl.NumberFormat('id-ID').format(kekurangan);
+
+            document.querySelector('#rab').innerHTML = "Rp. "+ formattedKebutuhan;
+            document.querySelector('#pemasukan').innerHTML = "Rp. "+ formattedPemasukan;
+            document.querySelector('#total').innerHTML = "Rp. "+ formattedPemasukan;
+            document.querySelector('#kekurangan').innerHTML = "Rp. "+ formattedKekurangan;
+
+            document.querySelector('#prosentasePemasukan').innerHTML = data.prosentasePemasukan;
+            document.querySelector('#prosentaseKekurangan').innerHTML = data.prosentaseKekurangan;
+
+            // Mendapatkan referensi ke elemen tbody
+            let tbody = document.getElementById("tableKeterangan").getElementsByTagName("tbody")[0];
+            // Mengganti isi dari tbody dengan data yang baru
+            let tbodyHTML = "<tr><th>Keterangan</th><th>Pemasukan</th></tr>";
+
+            let amountIs = '';
+            for (let t = 0; t < dataAPI.data.length; t++) {
+
+                amountIs = dataAPI.data[t]['amount'];
+                let amountFormat = new Intl.NumberFormat('id-ID').format(amountIs);
+
+                tbodyHTML += "<tr>";
+                tbodyHTML += "<td>" + dataAPI.data[t]["Nama"] + "</td>";
+                tbodyHTML += "<td> Rp. " + amountFormat + "</td>";
+                tbodyHTML += "</tr>";
+            }
+            
+            tbodyHTML += "<tfoot><td><b>Total :</b></td><td><b>Rp "+ formattedPemasukan +"</b></td></tfoot>";
+            tbody.innerHTML = tbodyHTML;
+
+            var ctx = document.getElementById('pieChart').getContext('2d');
+            var myPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    datasets: [{
+                        data: [dataProsentaseMasuk, dataProsentaseKekurangan],
+                        backgroundColor: ['#4e79a7','#f28e2b'],
+                        borderWidth: 1
+                    }],
+                    labels: [
+                        'Pemasukan',
+                        'Kekurangan'
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltips: {
+                        enabled: true
+                    },
+                    plugins: {
+                        datalabels: {
+                            color: '#000',
+                            textAlign: 'center',
+                            font: {
+                                weight: 'bold',
+                                size: 16
+                            },
+                            formatter: (value, ctx) => {
+                                let percentage = value + "%";
+                                return percentage;
+                            }
+                        }
+                    }
+                }
+            });
+            document.querySelector(".loader").style.display = 'none';
+            document.querySelector('.table_all').style.display = 'block';
+            document.querySelector('.slot-rab').style.display = 'block';
+            document.querySelector('.title-rab').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+        
+        
+    </script>
+</body>
+</html>
